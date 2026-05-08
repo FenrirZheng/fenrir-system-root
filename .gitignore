@@ -1,0 +1,22 @@
+# Allowlist mode: ignore everything by default, only track explicitly listed paths.
+# To track a new file: add `!/path/` for each parent dir, then `!/path/to/file`.
+
+/*
+!/.gitignore
+!/etc/
+!/usr/
+
+/etc/*
+!/etc/keyd/
+
+/etc/keyd/*
+!/etc/keyd/default.conf
+
+/usr/*
+!/usr/local/
+
+/usr/local/*
+!/usr/local/bin/
+
+/usr/local/bin/*
+!/usr/local/bin/fcitx5-toggle

@@ -1,0 +1,10 @@
+#!/bin/bash
+# Toggle fcitx5 IM state. Called by keyd on CapsLock tap.
+# keyd runs as root; this script drops to user fenrir's session bus
+# so fcitx5-remote can reach the fenrir-owned fcitx5 daemon.
+# Created by Claude Code 2026-05-08.
+exec /usr/sbin/runuser -u fenrir -- env \
+  DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus \
+  XDG_RUNTIME_DIR=/run/user/1000 \
+  DISPLAY=:0 \
+  /usr/bin/fcitx5-remote -t
