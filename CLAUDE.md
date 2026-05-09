@@ -4,25 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-A **system-config repo whose working tree IS the filesystem root** (`/`). It tracks a tiny allowlist of system files under `/etc` and `/usr/local/bin` that implement a Mac-feel keyboard layer for a Debian 13 GNOME-Wayland desktop (user `fenrir`, UID 1000).
+A **system-config repo whose working tree IS the filesystem root** (`/`), but whose `.git` lives at `$HOME/.sysconfig.git` as a bare repo. It tracks a tiny set of system files under `/etc` and `/usr/local/bin` that implement a Mac-feel keyboard layer for a Debian 13 GNOME-Wayland desktop (user `fenrir`, UID 1000).
 
-`git status` and edits operate against live system files. Changes to tracked paths take effect on the running system the moment they are written — there is no build step and no staging environment.
+Edits operate against live system files. Changes to tracked paths take effect on the running system the moment they are written — there is no build step and no staging environment.
 
-## Allowlist `.gitignore`
+## Bare-repo layout
 
-`.gitignore` ignores everything by default (`/*`) and re-includes specific paths. To track a new file you must un-ignore each parent directory and then the file itself, e.g.:
+There is **no `.git` directory at `/`** and **no `.gitignore`**. Instead, all git state is at `/root/.sysconfig.git` (bare), and `/root/.bashrc` defines:
 
 ```
-!/etc/
-/etc/*
-!/etc/keyd/
-/etc/keyd/*
-!/etc/keyd/default.conf
+alias sc='git --git-dir=$HOME/.sysconfig.git --work-tree=/'
 ```
 
-Do **not** loosen a parent rule (e.g. `!/etc/**`) — that would pull the entire system into the index. Only add the minimum entries needed for the new file.
+Use `sc` everywhere you would otherwise type `git` (`sc status`, `sc add /etc/foo.conf`, `sc commit`, `sc push`). The repo has `status.showUntrackedFiles=no` so `sc status` only reports modifications to already-tracked files — that is what replaces the old allowlist `.gitignore`. Adding a new file is just `sc add /absolute/path` with no parent-directory ceremony.
 
-Currently tracked: `.gitignore`, `CLAUDE.md`, `etc/keyd/default.conf`, `usr/local/bin/fcitx5-toggle`.
+Currently tracked: `CLAUDE.md`, `etc/keyd/default.conf`, `usr/local/bin/fcitx5-toggle`.
 
 ## The two managed components
 
@@ -57,4 +53,4 @@ Constraints:
 
 ## The `/docs/` directory
 
-`/docs/mac-keyboard-feel.md` is the long-form design doc covering architecture, every config file's full contents (including the user-side fcitx5 files that are **not** tracked here), setup-from-scratch, rollback, troubleshooting, and lessons learned. It is intentionally **not** tracked by git (the allowlist excludes it) but is the authoritative reference — read it before making non-trivial changes.
+`/docs/mac-keyboard-feel.md` is the long-form design doc covering architecture, every config file's full contents (including the user-side fcitx5 files that are **not** tracked here), setup-from-scratch, rollback, troubleshooting, and lessons learned. It is intentionally **not** tracked by git but is the authoritative reference — read it before making non-trivial changes.
