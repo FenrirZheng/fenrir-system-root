@@ -10,6 +10,8 @@ Edits operate against live system files. Changes to tracked paths take effect on
 
 ## Bare-repo layout
 
+This is the **bare-repo dotfiles pattern** (popularized by Atlassian's Nicola Paolucci, 2016) — a bare `.git` stored outside the worktree, with `--work-tree` pointing at `$HOME` (or here, `/`) and access mediated by a shell alias. The pattern's appeal is that tracked files live at their real paths with no symlink farm (cf. GNU Stow, dotbot) and no extra tooling (cf. chezmoi, yadm); the cost is a worktree that spans a huge tree, mitigated by `status.showUntrackedFiles=no`. This variant pushes the worktree all the way to `/` rather than `$HOME`, so `/etc/`, `/usr/local/bin/`, etc. are also in scope — effectively a lightweight system-config VCS, sitting between dotfiles management and configuration management (Ansible / NixOS).
+
 There is **no `.git` directory at `/`** and **no `.gitignore`**. Instead, all git state is at `/root/.sysconfig.git` (bare), and `/root/.bashrc` defines:
 
 ```
@@ -18,7 +20,9 @@ alias sc='git --git-dir=$HOME/.sysconfig.git --work-tree=/'
 
 Use `sc` everywhere you would otherwise type `git` (`sc status`, `sc add /etc/foo.conf`, `sc commit`, `sc push`). The repo has `status.showUntrackedFiles=no` so `sc status` only reports modifications to already-tracked files — that is what replaces the old allowlist `.gitignore`. Adding a new file is just `sc add /absolute/path` with no parent-directory ceremony.
 
-Currently tracked: `CLAUDE.md`, `etc/keyd/default.conf`, `usr/local/bin/fcitx5-toggle`.
+The alias itself is bootstrapped from the tracked `root/.bashrc`, so a fresh root shell on a checkout has `sc` available as soon as `.bashrc` is sourced.
+
+Currently tracked: `CLAUDE.md`, `etc/keyd/default.conf`, `usr/local/bin/fcitx5-toggle`, `root/.bashrc`.
 
 ## The two managed components
 
