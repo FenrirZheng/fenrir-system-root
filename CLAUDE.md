@@ -24,11 +24,14 @@ Currently tracked: `CLAUDE.md`, `etc/keyd/default.conf`, `usr/local/bin/fcitx5-t
 
 ### `/etc/keyd/default.conf` — keyd remap
 
-keyd runs as root via `keyd.service`, reads evdev events, and emits remapped events through `/dev/uinput`. The config defines four layers:
+keyd runs as root via `keyd.service`, reads evdev events, and emits remapped events through `/dev/uinput`. The config defines three layers:
 
-- `[main]` — physical-key bindings (LeftAlt→cmd, LeftMeta→opt, CapsLock→ctrl_layer+toggle command).
+- `[main]` — physical-key bindings:
+  - LeftCtrl (bottom-left corner) → `layer(meta)`, i.e. Super. Used as `layer()` rather than a bare `leftmeta` RHS so it behaves as a real Super modifier in chords (Super+L, etc.); keyd 2.5 explicitly warns against bare `leftmeta` here.
+  - LeftMeta(Win) → `overload(opt, leftmeta)` — hold enters opt layer, tap emits Super (GNOME Activities).
+  - CapsLock → `overload(ctrl_layer, command(/usr/local/bin/fcitx5-toggle))` — hold enters ctrl_layer, tap shells out to the IME toggle.
+  - LeftAlt and RightCtrl pass through unchanged.
 - `[ctrl_layer:C]` — empty body; `:C` suffix auto-prefixes Ctrl on every chord (CapsLock-hold replicates "CapsLock as Ctrl").
-- `[cmd:C]` — Mac Cmd layer; `:C` makes letter chords auto-Ctrl. Explicit overrides cover caret motion (`left=home`, `right=end`, `up/down=C-home/C-end`).
 - `[opt:A]` — Mac Option layer; `:A` auto-prefixes Alt. Explicit overrides cover word-jump (`left=C-left`, `right=C-right`, `backspace=C-backspace`).
 
 After editing: `sudo systemctl restart keyd` (changes are not picked up automatically). Use `journalctl -u keyd --no-pager` for diagnostics; `DEVICE: match` lines confirm which keyboards keyd grabbed.
